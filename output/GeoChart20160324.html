@@ -1,0 +1,148 @@
+﻿<!DOCTYPE HTML>
+<!-- saved from url=(0066)http://127.0.0.1:28962/custom/googleVis/GeoChartID47081114829.html -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><HTML 
+xmlns="http://www.w3.org/1999/xhtml"><HEAD><META content="IE=11.0000" 
+http-equiv="X-UA-Compatible">
+ <TITLE>GeoChartID47081114829</TITLE> 
+<META http-equiv="content-type" content="text/html;charset=utf-8"> 
+<STYLE type="text/css">
+body {
+  color: #444444;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 75%;
+  }
+  a {
+  color: #4D87C7;
+  text-decoration: none;
+}
+</STYLE>
+ 
+<META name="GENERATOR" content="MSHTML 11.00.9600.18212"></HEAD> 
+<BODY><!-- GeoChart generated in R 3.2.4 by googleVis 0.5.10 package --> <!-- Thu Mar 24 12:31:43 2016 --> <!-- jsHeader --> 
+<SCRIPT type="text/javascript">
+ 
+// jsData 
+function gvisDataGeoChartID47081114829 () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "Austria",
+60 
+],
+[
+ "Belgium",
+9 
+],
+[
+ "Czech Republic",
+4 
+],
+[
+ "France",
+33 
+],
+[
+ "Germany",
+64 
+],
+[
+ "Greece",
+15 
+],
+[
+ "Luxembourg",
+3 
+],
+[
+ "Netherlands",
+451 
+],
+[
+ "Poland",
+2 
+],
+[
+ "Spain",
+24 
+],
+[
+ "Switzerland",
+14 
+] 
+];
+data.addColumn('string','land');
+data.addColumn('number','totaal');
+data.addRows(datajson);
+return(data);
+}
+ 
+// jsDrawChart
+function drawChartGeoChartID47081114829() {
+var data = gvisDataGeoChartID47081114829();
+var options = {};
+options["width"] =    600;
+options["height"] =    400;
+options["region"] =    150;
+options["displayMode"] = "regions";
+options["resolution"] = "countries";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID47081114829')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+ 
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID47081114829);
+})();
+function displayChartGeoChartID47081114829() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+ 
+// jsFooter
+</SCRIPT>
+  <!-- jsChart -->  
+<SCRIPT src="GeoChart20160324_files/jsapi.js" type="text/javascript"></SCRIPT>
+  <!-- divChart -->   
+<DIV id="GeoChartID47081114829"></DIV>
+<DIV><SPAN>Data: landTotalen • Chart ID: <A href="http://127.0.0.1:28962/custom/googleVis/Chart_GeoChartID47081114829.html">GeoChartID47081114829</A> 
+• <A href="https://github.com/mages/googleVis">googleVis-0.5.10</A></SPAN><BR><!-- htmlFooter --> 
+<SPAN>   R version 3.2.4 (2016-03-10)    • <A href="https://developers.google.com/terms/">Google 
+Terms of Use</A> • <A href="https://google-developers.appspot.com/chart/interactive/docs/gallery/geochart">Documentation 
+and Data Policy</A> </SPAN></DIV></BODY></HTML>

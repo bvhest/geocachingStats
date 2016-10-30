@@ -1,0 +1,224 @@
+# geochacing statistieken
+#
+# BvH, maart 2016
+
+setwd("/media/hestbv/Windows/Projecten/R/geocachingStats/code")
+
+library(RCurl)
+library(XML)
+library(stringr)
+require(dplyr)
+# plotting libraries
+library(ggplot2)
+library(scales)
+# maps libraries
+#library(googleVis)
+#library(choroplethrAdmin1)
+#library(choroplethr)
+#library(ggmap)
+#library(mapproj)
+#library (plotGoogleMaps)
+
+#####################################################################################
+# load the data:
+#####################################################################################
+# build the URL
+url <- "file:///media/hestbv/Windows/Projecten/R/geocachingStats/data/UdenGeocaching.html"
+
+# read the tables and select the one that has the most rows
+tables <- readHTMLTable(url)
+n.rows <- unlist(lapply(tables, function(t) dim(t)[1]))
+#tables[[which.max(n.rows)]]
+
+# select the table we need (the "ledenlijst") - read as a dataframe
+my.table <- tables[[which.max(n.rows)]]
+
+#####################################################################################
+# data cleaning:
+#####################################################################################
+# returns string w/o leading or trailing whitespace
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+
+# delete first (photo) column and keep data rows
+my.table <- my.table[, c(3:5) ]
+colnames(my.table) <- c("datum", "naam", "regio")
+# first some conversion:
+my.table$datum <- as.Date(my.table$datum, "%d/%b/%Y")
+my.table$naam <- as.character(my.table$naam)
+my.table$regio <- as.character(my.table$regio)
+# remove dirt from the data
+my.table$regio <- gsub("\n","",my.table$regio)
+
+# separate region and country (if both are present)
+my.table$land <- NA
+maxRows <- length(my.table$naam)
+for (i in 1:maxRows) {
+   countryRegions <- unlist(strsplit(my.table$regio[i], ","))
+   print(i)
+   print(countryRegions)
+   if (is.na(countryRegions[2])) {
+      print("only country available")
+      my.table$regio[i] <- NA
+      my.table$land[i] <- trim(countryRegions[1])
+   } else {
+      print("country and region available")
+      my.table$regio[i] <- trim(countryRegions[1])
+      my.table$land[i] <- trim(countryRegions[2])
+   }
+}
+
+my.table$jaar <- as.character(my.table$datum, "%Y")
+my.table$maand <- as.character(my.table$datum, "%b")
+
+# sorteer op oplopende datum:                                                            
+my.table <- my.table[order(my.table$datum),] 
+
+# my.table <- my.table[complete.cases(my.table),]
+
+#####################################################################################
+# bereken cumulatieven per jaar
+#####################################################################################
+df <- my.table
+df$count <- 1
+df$jaar_som <- 0
+df <- within(df, tot_som <- cumsum(count))
+for (jaar in min(df$jaar):max(df$jaar)) {
+   df[df$jaar==jaar,] <- within(df[df$jaar==jaar,], jaar_som <- cumsum(count))
+}
+
+class(df$datum)
+class(df$jaar_som)
+class(df$tot_som)
+
+#####################################################################################
+# plot cumulatieven per jaar
+# check: http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/
+# note: geam_ribbon works, but geom_area does not...
+#####################################################################################
+ggplot(df, aes(x = datum), show.legend = FALSE) +
+  geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
+#  geom_line(aes(y = tot_som, colour = "#35520F"), show.legend = FALSE) +
+  geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
+  theme_bw() +
+  labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+  scale_y_continuous(breaks = round(seq(0, 700, by = 100),1))
+
+dev.copy(png,"../images/geocachesJaartotalen.png", width=800, height=501)
+dev.off();
+
+#####################################################################################
+# plot staafdiagram van totalen per jaar
+#####################################################################################
+jaarTotalen <- df %>%
+   group_by(jaar) %>%
+   summarize(jaar_som = sum(count))
+
+jaarTotalenPerLand <- df %>%
+  group_by(jaar,land) %>%
+  summarize(totaal = sum(count))
+
+# plot de resultaten: histogram met aantal gevonden caches per maand:
+ggplot(jaarTotalenPerLand, aes(x=jaar,y=totaal, fill=land)) +
+# + stat_summary(fun.y=sum,geom="bar")
+  geom_bar(stat="identity") +
+  theme_bw() +
+  labs(title="Aantal gevonden caches per jaar", x="jaar", y="aantal") +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0))
+
+dev.copy(png,"../images/geocachesJaartotalenPerLand.png", width=800, height=501)
+dev.off();
+
+
+#####################################################################################
+# bereken totalen per land
+#
+# example: http://ggplot2.org/book/qplot.pdf
+#####################################################################################
+# plot de resultaten: histogram met aantal gevonden caches per maand:
+ggplot(jaarTotalenPerLand, aes(x=land,y=totaal, fill=jaar)) +
+  geom_bar(stat="identity") +
+  theme_bw() +
+  labs(title="Aantal gevonden caches per land", x="land", y="aantal") +
+  scale_y_discrete(breaks=seq(0, 200, by=20), labels=seq(0, 200, by=20)) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0))
+
+dev.copy(png,"../images/geocachesTotalenPerLandEnJaar.png", width=800, height=501)
+dev.off();
+
+#####################################################################################
+# bereken totalen per maand
+#####################################################################################
+df$mnd <- as.character(my.table$datum, "%m")
+maandTotalen <- df %>%
+   group_by(mnd) %>%
+   summarize(maand_som = sum(count))
+
+# merge maand terug in resultaat:
+maandTotalen <- unique(merge(maandTotalen, df[,c("mnd","maand")], by="mnd"))
+# en fix de sortering van de maanden:
+maandTotalen$maand <- factor(maandTotalen$maand, levels=unique(maandTotalen$maand))
+
+# plot de resultaten: histogram met aantal gevonden caches per maand:
+ggplot(maandTotalen, aes(x=maand,y=maand_som)) + 
+  stat_summary(fun.y=sum,geom="bar", fill="#00A6FF") +
+  theme_bw() +
+  labs(title="Aantal gevonden caches per maand", x="maand", y="aantal") +
+  scale_y_discrete(breaks=seq(0, 110, by=10), labels=seq(0, 110, by=10)) 
+
+dev.copy(png,"../images/geocachesMaandtotalen.png", width=800, height=501)
+dev.off();
+
+#####################################################################################
+# bereken totalen per dag-van-de-week
+#####################################################################################
+df$dvw <- as.character(my.table$datum, "%a")
+dagTotalen <- df %>%
+   group_by(dvw) %>%
+   summarize(dvw_som = sum(count))
+
+# fix de sortering van de dagen:
+dagTotalen$dagNum <- c(5,1,6,7,4,2,3)
+dagTotalen <- dagTotalen[order(dagTotalen$dagNum),] 
+
+dagTotalen$dvw <- factor(dagTotalen$dvw, levels=unique(dagTotalen$dvw))
+
+# plot de resultaten: histogram met aantal gevonden caches per maand:
+ggplot(dagTotalen, aes(x=dvw,y=dvw_som)) + 
+  stat_summary(fun.y=sum,geom="bar", fill="#00A6FF") +
+  theme_bw() +
+  labs(title="Aantal gevonden caches per weekdag", x="weekdag", y="aantal") +
+  scale_y_discrete(breaks=seq(0, 200, by=20), labels=seq(0, 200, by=20)) 
+
+dev.copy(png,"../images/geocachesWeekdagtotalen.png", width=800, height=501)
+dev.off();
+
+#####################################################################################
+# toon de totalen per land in een landkaart
+#
+# example: http://cran.r-project.org/web/packages/googleVis/vignettes/googleVis_examples.html
+#####################################################################################
+landTotalen <- df %>%
+  group_by(land) %>%
+  summarize(totaal = sum(count))
+
+# choroplethEurope <- gvisGeoChart(landTotalen, 
+#                                  locationvar = "land",
+#                                  colorvar = "totaal",
+#                                  options = list(width="800" 
+#                                                 ,height="501"
+#                                                 ,displayMode="regions"
+#                                                 ,region="150"
+# #                                             ,colors="[0xF8DFA7,0x8D9569,0xE9CC99,0xE2AD5A,0xCA7363]"
+#                                  )
+# )
+#plot(choroplethEurope)
+#choroplethEurope
+
+cacheCountries <- gvisGeoChart(data=landTotalen, 
+                               locationvar="land", colorvar="totaal",
+                               options=list(region=150, # 150 - Europe
+                                            displayMode="regions", 
+                                            resolution="countries",
+                                            width=600, height=400))
+plot(cacheCountries)
