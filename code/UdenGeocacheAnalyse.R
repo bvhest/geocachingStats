@@ -1,8 +1,8 @@
 # geochacing statistieken
 #
-# BvH, maart 2016
+# BvH, oktober 2016
 
-setwd("/media/hestbv/Windows/Projecten/R/geocachingStats/code")
+#setwd("/media/hestbv/Windows/Projecten/R/geocachingStats/code")
 
 library(RCurl)
 library(XML)
@@ -12,18 +12,23 @@ require(dplyr)
 library(ggplot2)
 library(scales)
 # maps libraries
-#library(googleVis)
+library(googleVis)
+
 #library(choroplethrAdmin1)
 #library(choroplethr)
 #library(ggmap)
 #library(mapproj)
 #library (plotGoogleMaps)
 
+Sys.getlocale("LC_TIME")
+Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
+
 #####################################################################################
 # load the data:
 #####################################################################################
 # build the URL
-url <- "file:///media/hestbv/Windows/Projecten/R/geocachingStats/data/UdenGeocaching.html"
+#url <- "file:///media/hestbv/Windows/Projecten/R/geocachingStats/data/UdenGeocaching.html"
+url <- "./data/UdenGeocaching.html"
 
 # read the tables and select the one that has the most rows
 tables <- readHTMLTable(url)
@@ -38,10 +43,12 @@ my.table <- tables[[which.max(n.rows)]]
 #####################################################################################
 # returns string w/o leading or trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+trim2 <- function (x) gsub("\\s", "", x)
 
 # delete first (photo) column and keep data rows
 my.table <- my.table[, c(3:5) ]
 colnames(my.table) <- c("datum", "naam", "regio")
+
 # first some conversion:
 my.table$datum <- as.Date(my.table$datum, "%d/%b/%Y")
 my.table$naam <- as.character(my.table$naam)
@@ -104,12 +111,19 @@ ggplot(df, aes(x = datum), show.legend = FALSE) +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
   scale_y_continuous(breaks = round(seq(0, 700, by = 100),1))
 
-dev.copy(png,"../images/geocachesJaartotalen.png", width=800, height=501)
-dev.off();
+pathname <- "./images"
+printfile <- "geocachesJaartotalen.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
+
 
 #####################################################################################
 # plot staafdiagram van totalen per jaar
 #####################################################################################
+df$land <- as.factor(trim(df$land))
+df$regio <- as.factor(trim(df$regio))
+
+glimpse(df)
+
 jaarTotalen <- df %>%
    group_by(jaar) %>%
    summarize(jaar_som = sum(count))
@@ -117,6 +131,9 @@ jaarTotalen <- df %>%
 jaarTotalenPerLand <- df %>%
   group_by(jaar,land) %>%
   summarize(totaal = sum(count))
+
+jaarTotalenPerLand$totaal <- as.integer(jaarTotalenPerLand$totaal)
+glimpse(jaarTotalenPerLand)
 
 # plot de resultaten: histogram met aantal gevonden caches per maand:
 ggplot(jaarTotalenPerLand, aes(x=jaar,y=totaal, fill=land)) +
@@ -126,8 +143,8 @@ ggplot(jaarTotalenPerLand, aes(x=jaar,y=totaal, fill=land)) +
   labs(title="Aantal gevonden caches per jaar", x="jaar", y="aantal") +
   theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0))
 
-dev.copy(png,"../images/geocachesJaartotalenPerLand.png", width=800, height=501)
-dev.off();
+printfile <- "geocachesJaartotalenPerLand.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 
 #####################################################################################
@@ -136,15 +153,14 @@ dev.off();
 # example: http://ggplot2.org/book/qplot.pdf
 #####################################################################################
 # plot de resultaten: histogram met aantal gevonden caches per maand:
-ggplot(jaarTotalenPerLand, aes(x=land,y=totaal, fill=jaar)) +
+ggplot(jaarTotalenPerLand, aes(x=land, y=totaal, fill=jaar)) +
   geom_bar(stat="identity") +
   theme_bw() +
   labs(title="Aantal gevonden caches per land", x="land", y="aantal") +
-  scale_y_discrete(breaks=seq(0, 200, by=20), labels=seq(0, 200, by=20)) +
-  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0))
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0))
 
-dev.copy(png,"../images/geocachesTotalenPerLandEnJaar.png", width=800, height=501)
-dev.off();
+printfile <- "geocachesTotalenPerLandEnJaar.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
 # bereken totalen per maand
@@ -162,12 +178,12 @@ maandTotalen$maand <- factor(maandTotalen$maand, levels=unique(maandTotalen$maan
 # plot de resultaten: histogram met aantal gevonden caches per maand:
 ggplot(maandTotalen, aes(x=maand,y=maand_som)) + 
   stat_summary(fun.y=sum,geom="bar", fill="#00A6FF") +
+#  scale_y_discrete(breaks=seq(0, 110, by=10), labels=seq(0, 110, by=10)) +
   theme_bw() +
-  labs(title="Aantal gevonden caches per maand", x="maand", y="aantal") +
-  scale_y_discrete(breaks=seq(0, 110, by=10), labels=seq(0, 110, by=10)) 
+  labs(title="Aantal gevonden caches per maand", x="maand", y="aantal") 
 
-dev.copy(png,"../images/geocachesMaandtotalen.png", width=800, height=501)
-dev.off();
+printfile <- "geocachesMaandtotalen.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
 # bereken totalen per dag-van-de-week
@@ -186,12 +202,12 @@ dagTotalen$dvw <- factor(dagTotalen$dvw, levels=unique(dagTotalen$dvw))
 # plot de resultaten: histogram met aantal gevonden caches per maand:
 ggplot(dagTotalen, aes(x=dvw,y=dvw_som)) + 
   stat_summary(fun.y=sum,geom="bar", fill="#00A6FF") +
+#  scale_y_discrete(breaks=seq(0, 200, by=20), labels=seq(0, 200, by=20)) +
   theme_bw() +
-  labs(title="Aantal gevonden caches per weekdag", x="weekdag", y="aantal") +
-  scale_y_discrete(breaks=seq(0, 200, by=20), labels=seq(0, 200, by=20)) 
+  labs(title="Aantal gevonden caches per weekdag", x="weekdag", y="aantal")
 
-dev.copy(png,"../images/geocachesWeekdagtotalen.png", width=800, height=501)
-dev.off();
+printfile <- "geocachesWeekdagtotalen.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
 # toon de totalen per land in een landkaart
