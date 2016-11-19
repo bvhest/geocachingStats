@@ -143,7 +143,7 @@ ggplot(jaarTotalenPerLand, aes(x=jaar,y=totaal, fill=land)) +
   labs(title="Aantal gevonden caches per jaar", x="jaar", y="aantal") +
   theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0))
 
-printfile <- "geocachesJaartotalenPerLand.png"
+printfile <- "geocachesTotalenPerJaarEnLand.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 
