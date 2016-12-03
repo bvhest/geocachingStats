@@ -11,6 +11,9 @@ require(dplyr)
 # plotting libraries
 library(ggplot2)
 library(scales)
+library(gtable)
+library(grid)
+
 # maps libraries
 library(googleVis)
 
@@ -104,17 +107,91 @@ class(df$tot_som)
 #####################################################################################
 ggplot(df, aes(x = datum), show.legend = FALSE) +
   geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
-#  geom_line(aes(y = tot_som, colour = "#35520F"), show.legend = FALSE) +
-  geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
+  geom_point(aes(x = datum, y = 4*jaar_som, colour = "#F8766D"), show.legend = FALSE) +
   theme_bw() +
   labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
-  scale_y_continuous(breaks = round(seq(0, 700, by = 100),1))
+  scale_y_continuous(breaks = round(seq(0, 800, by = 100),1), 
+                     expand = c(0, 0), 
+                     limits = c(0,800))
 
 pathname <- "./images"
 printfile <- "geocachesJaartotalen.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
+
+# één ggplot met twee y-assen (zie http://drawar.github.io/posts/dual-y-axis-ggplot2/)
+p1 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
+      geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
+#      geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
+      theme_bw() +
+      labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
+      scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+      scale_y_continuous(breaks = round(seq(0, 800, by = 100),1), 
+                         expand = c(0, 0), 
+                         limits = c(0,800))
+p1
+
+p2 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
+      geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
+      theme_bw() +
+      labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
+      scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+      scale_y_continuous(breaks = round(seq(0, 200, by = 10),1), 
+                         expand = c(0, 0), 
+                         limits = c(0, 200))
+p2
+# ... en hierna volgt nog veel meer code ...
+
+# optie twee (zie https://rpubs.com/kohske/dual_axis_in_ggplot2)
+grid.newpage()
+
+p1 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
+  geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+  scale_y_continuous(expand = c(0, 0), 
+                     limits = c(0,800)) +
+  theme_bw() +
+  labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="totaal aantal")
+  
+p2 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
+  geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+  scale_y_continuous(expand = c(0, 0), 
+                     limits = c(0, 200)) + 
+  theme_bw() %+replace% 
+  theme(panel.background = element_rect(fill = NA))
+
+# extract gtable
+g1 <- ggplot_gtable(ggplot_build(p1))
+g2 <- ggplot_gtable(ggplot_build(p2))
+
+# overlap the panel of 2nd plot on that of 1st plot
+pp <- c(subset(g1$layout, name == "panel", se = t:r))
+g <- gtable_add_grob(g1, g2$grobs[[which(g2$layout$name == "panel")]], pp$t, 
+                     pp$l, pp$b, pp$l)
+
+# axis tweaks
+ia <- which(g2$layout$name == "axis-l")
+ga <- g2$grobs[[ia]]
+ax <- ga$children[[2]]
+ax$widths <- rev(ax$widths)
+ax$grobs <- rev(ax$grobs)
+ax$grobs[[1]]$x <- ax$grobs[[1]]$x - unit(1, "npc") + unit(0.15, "cm")
+g <- gtable_add_cols(g, g2$widths[g2$layout[ia, ]$l], length(g$widths) - 1)
+g <- gtable_add_grob(g, ax, pp$t, length(g$widths) - 1, pp$b)
+
+# draw it
+grid.draw(g)
+
+pathname <- "./images"
+printfile <- "geocachesJaartotalen.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
+
+ppi <- 300
+png(paste0(pathname,'/',printfile), width=10.5*ppi, height=6.5*ppi, res=ppi)
+print(grid.draw(g))
+dev.off()
 
 #####################################################################################
 # plot staafdiagram van totalen per jaar
