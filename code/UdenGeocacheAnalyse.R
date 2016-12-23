@@ -100,10 +100,36 @@ class(df$datum)
 class(df$jaar_som)
 class(df$tot_som)
 
+#####################################################################################
+# bereken cumulatieven per maand
+#####################################################################################
+df$mnd <- as.character(my.table$datum, "%m")
+
+#####################################################################################
+# bereken cumulatieven per dag
+#####################################################################################
+df$dvw <- as.character(my.table$datum, "%a")
+
+#####################################################################################
+# toon data
+#####################################################################################
+# hoeveel caches per dag?
+df %>% 
+  group_by(dvw) %>%
+  summarise(total = n()) %>%
+  arrange(total)
+
+# hoeveel caches per maand?
+df %>% 
+  group_by(mnd) %>%
+  summarise(total = n()) %>%
+  arrange(mnd)
+
 # hoeveel caches per jaar?
 df %>% 
   group_by(jaar) %>%
-  summarise(total = n())
+  summarise(total = n())%>%
+  arrange(jaar)
 
 # hoeveel caches per land?
 df %>% 
@@ -137,26 +163,26 @@ ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width =
 
 
 # één ggplot met twee y-assen (zie http://drawar.github.io/posts/dual-y-axis-ggplot2/)
-p1 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
-      geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
-#      geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
-      theme_bw() +
-      labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
-      scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
-      scale_y_continuous(breaks = round(seq(0, 800, by = 100),1), 
-                         expand = c(0, 0), 
-                         limits = c(0,800))
-p1
-
-p2 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
-      geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
-      theme_bw() +
-      labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
-      scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
-      scale_y_continuous(breaks = round(seq(0, 200, by = 10),1), 
-                         expand = c(0, 0), 
-                         limits = c(0, 200))
-p2
+# p1 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
+#       geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
+# #      geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
+#       theme_bw() +
+#       labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
+#       scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+#       scale_y_continuous(breaks = round(seq(0, 800, by = 100),1), 
+#                          expand = c(0, 0), 
+#                          limits = c(0,800))
+# p1
+# 
+# p2 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
+#       geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
+#       theme_bw() +
+#       labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
+#       scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+#       scale_y_continuous(breaks = round(seq(0, 200, by = 10),1), 
+#                          expand = c(0, 0), 
+#                          limits = c(0, 200))
+# p2
 # ... en hierna volgt nog veel meer code ...
 
 # optie twee (zie https://rpubs.com/kohske/dual_axis_in_ggplot2)
@@ -256,12 +282,11 @@ printfile <- "geocachesTotalenPerLandEnJaar.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
-# bereken totalen per maand
+# plot totalen per maand
 #####################################################################################
-df$mnd <- as.character(my.table$datum, "%m")
 maandTotalen <- df %>%
-   group_by(mnd) %>%
-   summarize(maand_som = sum(count))
+  group_by(mnd) %>%
+  summarize(maand_som = sum(count))
 
 # merge maand terug in resultaat:
 maandTotalen <- unique(merge(maandTotalen, df[,c("mnd","maand")], by="mnd"))
@@ -281,7 +306,6 @@ ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width =
 #####################################################################################
 # bereken totalen per dag-van-de-week
 #####################################################################################
-df$dvw <- as.character(my.table$datum, "%a")
 dagTotalen <- df %>%
    group_by(dvw) %>%
    summarize(dvw_som = sum(count))
