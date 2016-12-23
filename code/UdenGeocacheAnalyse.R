@@ -100,6 +100,22 @@ class(df$datum)
 class(df$jaar_som)
 class(df$tot_som)
 
+# hoeveel caches per jaar?
+df %>% 
+  group_by(jaar) %>%
+  summarise(total = n())
+
+# hoeveel caches per land?
+df %>% 
+  group_by(land) %>%
+  summarise(total = n()) %>%
+  arrange(total)
+
+# totaal aantal caches?
+df %>% 
+  summarise(total = n())
+# ... er ontbreken er een paar (3 op 23/12/2016)
+
 #####################################################################################
 # plot cumulatieven per jaar
 # check: http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/
