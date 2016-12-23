@@ -2,3 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+/.project
+voorbeeld
+images
+*.png
+*.gif
