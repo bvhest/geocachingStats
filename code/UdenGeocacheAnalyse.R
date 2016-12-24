@@ -32,14 +32,28 @@ Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
 # build the URL
 #url <- "file:///media/hestbv/Windows/Projecten/R/geocachingStats/data/UdenGeocaching.html"
 url <- "./data/UdenGeocaching.html"
-
 # read the tables and select the one that has the most rows
 tables <- readHTMLTable(url)
 n.rows <- unlist(lapply(tables, function(t) dim(t)[1]))
-#tables[[which.max(n.rows)]]
-
 # select the table we need (the "ledenlijst") - read as a dataframe
-my.table <- tables[[which.max(n.rows)]]
+my.table1 <- tables[[which.max(n.rows)]]
+
+url <- "./data/UdenGeocaching_attended.html"
+# read the tables and select the one that has the most rows
+tables <- readHTMLTable(url)
+n.rows <- unlist(lapply(tables, function(t) dim(t)[1]))
+# select the table we need (the "ledenlijst") - read as a dataframe
+my.table2 <- tables[[which.max(n.rows)]]
+
+url <- "./data/UdenGeocaching_webcam.html"
+# read the tables and select the one that has the most rows
+tables <- readHTMLTable(url)
+n.rows <- unlist(lapply(tables, function(t) dim(t)[1]))
+# select the table we need (the "ledenlijst") - read as a dataframe
+my.table3 <- tables[[which.max(n.rows)]]
+
+# combineer resultaten
+my.table <- rbind(my.table1, my.table2, my.table3)
 
 #####################################################################################
 # data cleaning:
@@ -192,7 +206,7 @@ p1 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
   geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
   scale_y_continuous(expand = c(0, 0), 
-                     limits = c(0,800)) +
+                     limits = c(0,860)) +
   theme_bw() +
   labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="totaal aantal")
   
@@ -200,7 +214,7 @@ p2 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
   geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
   scale_y_continuous(expand = c(0, 0), 
-                     limits = c(0, 200)) + 
+                     limits = c(0, 215)) + 
   theme_bw() %+replace% 
   theme(panel.background = element_rect(fill = NA))
 
@@ -353,5 +367,5 @@ cacheCountries <- gvisGeoChart(data=landTotalen,
                                options=list(region=150, # 150 - Europe
                                             displayMode="regions", 
                                             resolution="countries",
-                                            width=600, height=400))
+                                            width=1200, height=800))
 plot(cacheCountries)
