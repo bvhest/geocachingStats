@@ -8,6 +8,7 @@ library(RCurl)
 library(XML)
 library(stringr)
 require(dplyr)
+library(tidyr)
 # plotting libraries
 library(ggplot2)
 library(scales)
@@ -55,6 +56,7 @@ my.table3 <- tables[[which.max(n.rows)]]
 # combineer resultaten
 my.table <- rbind(my.table1, my.table2, my.table3)
 
+remove(my.table1, my.table2, my.table3)
 #####################################################################################
 # data cleaning:
 #####################################################################################
@@ -340,6 +342,31 @@ ggplot(dagTotalen, aes(x=dvw,y=dvw_som)) +
 printfile <- "geocachesWeekdagtotalen.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
+
+#####################################################################################
+# toon de aantallen per jaar en maand in een heatmap
+#####################################################################################
+
+df.hm <- df %>% 
+  group_by(jaar, mnd) %>%
+  summarise(total = n()) %>%
+  arrange(jaar,mnd)
+
+glimpse(df.hm)
+
+df.hm$jaar <- as.numeric(df.hm$jaar)
+df.hm$mnd <- as.numeric(df.hm$mnd)
+df.hm$total <- as.numeric(df.hm$total)
+
+# tonen
+ggplot(data = df.hm, aes(x = mnd, y = jaar)) +
+  geom_tile(aes(fill = total)) +
+  scale_fill_gradient(low = "light green", high = "dark green") +
+  scale_x_continuous(breaks = seq(1, 12, by = 1), labels = seq(1, 12, by = 1)) +
+  scale_y_continuous(breaks = seq(2007, 2016, by = 1), labels = seq(2007, 2016, by = 1)) +
+  theme_bw() + 
+  labs(title="Aantal gevonden caches per jaar en maand", x="maand", y="jaar")
+
 #####################################################################################
 # toon de totalen per land in een landkaart
 #
@@ -348,19 +375,6 @@ ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width =
 landTotalen <- df %>%
   group_by(land) %>%
   summarize(totaal = sum(count))
-
-# choroplethEurope <- gvisGeoChart(landTotalen, 
-#                                  locationvar = "land",
-#                                  colorvar = "totaal",
-#                                  options = list(width="800" 
-#                                                 ,height="501"
-#                                                 ,displayMode="regions"
-#                                                 ,region="150"
-# #                                             ,colors="[0xF8DFA7,0x8D9569,0xE9CC99,0xE2AD5A,0xCA7363]"
-#                                  )
-# )
-#plot(choroplethEurope)
-#choroplethEurope
 
 cacheCountries <- gvisGeoChart(data=landTotalen, 
                                locationvar="land", colorvar="totaal",
