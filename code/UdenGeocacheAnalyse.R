@@ -8,7 +8,6 @@ library(RCurl)
 library(XML)
 library(stringr)
 require(dplyr)
-library(tidyr)
 # plotting libraries
 library(ggplot2)
 library(scales)
@@ -206,15 +205,14 @@ grid.newpage()
 
 p1 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
   geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
-  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels = date_format("%Y")) +
   scale_y_continuous(expand = c(0, 0), 
-                     limits = c(0,860)) +
+                     limits = c(0, 860)) +
   theme_bw() +
-  labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="totaal aantal")
+  labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x = "jaar", y = "totaal aantal")
   
 p2 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
   geom_point(aes(x = datum, y = jaar_som, colour = "#F8766D"), show.legend = FALSE) +
-  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
   scale_y_continuous(expand = c(0, 0), 
                      limits = c(0, 215)) + 
   theme_bw() %+replace% 
