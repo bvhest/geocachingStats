@@ -118,7 +118,8 @@ class(df$tot_som)
 #####################################################################################
 # bereken cumulatieven per maand
 #####################################################################################
-df$mnd <- as.character(my.table$datum, "%m")
+df$mnd <- as.numeric(as.character(my.table$datum, "%m"))
+df$jaar <- as.numeric(df$jaar)
 
 #####################################################################################
 # bereken cumulatieven per dag
@@ -364,6 +365,55 @@ ggplot(data = df.hm, aes(x = mnd, y = jaar)) +
   scale_y_continuous(breaks = seq(2007, 2016, by = 1), labels = seq(2007, 2016, by = 1)) +
   theme_bw() + 
   labs(title="Aantal gevonden caches per jaar en maand", x="maand", y="jaar")
+
+##############################################################################################
+# toon de aantallen per dag in een calender heatmap
+##############################################################################################
+source("../tools/calendarHeat.R")
+
+library(RColorBrewer)
+myColors <- brewer.pal(9,"OrRd")
+
+dagTotalen <- df %>%
+  group_by(datum) %>%
+  summarize(totaal = sum(count))
+
+dagTotalen <- transform(dagTotalen,
+                        week = as.POSIXlt(datum)$yday %/% 7 + 1,
+                        wdag = as.POSIXlt(datum)$wday,
+                        jaar = as.POSIXlt(datum)$year + 1900,
+                        dvw  = as.character(datum, "%a"))
+
+# max. 3 jaren per 'pagina', dus de data opsplitsen:
+jaar <- min(year = as.POSIXlt(dagTotalen$datum)$year + 1900)
+for (i in 0:3) {
+  jaarMin <- jaar + (i*3)
+  jaarMax <- jaarMin + 3
+  view <- dagTotalen[dagTotalen$jaar >= jaarMin & dagTotalen$jaar < jaarMax,]
+  if (i == 0) {
+    titel <- "Gevonden caches per dag" 
+  } else {
+    titel <- ""
+  }
+  calendarHeat(view$datum,
+               view$totaal,
+               colors = myColors,
+               ncolors = 9,
+               title = titel)
+  
+  dev.copy(png, paste("./images/kalenderHeatmap_",jaarMin,".png",sep=""), width=1000, height=496)
+  dev.off()
+}
+# probleem: nu zijn de maximum waarden, en daarmee de kleurenschaal, per groep 
+# van jaren verschillend.
+
+# nu met ggplot:
+ggplot(dagTotalen, aes(week, wdag, fill = totaal)) + 
+  geom_tile(colour = "white") + 
+  scale_fill_gradientn(colours = myColors) + 
+  facet_wrap(~ jaar, ncol = 1) +
+  theme_bw() + 
+  labs(title = "Aantal gevonden caches per kalendardag", x="week", y="weekdag")
 
 #####################################################################################
 # toon de totalen per land in een landkaart
