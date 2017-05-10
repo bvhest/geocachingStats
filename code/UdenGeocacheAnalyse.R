@@ -119,7 +119,7 @@ class(df$tot_som)
 # bereken cumulatieven per maand
 #####################################################################################
 df$mnd <- as.numeric(as.character(my.table$datum, "%m"))
-df$jaar <- as.numeric(df$jaar)
+#df$jaar <- as.numeric(df$jaar)
 
 #####################################################################################
 # bereken cumulatieven per dag
@@ -169,9 +169,9 @@ ggplot(df, aes(x = datum), show.legend = FALSE) +
   theme_bw() +
   labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
-  scale_y_continuous(breaks = round(seq(0, 800, by = 100),1), 
+  scale_y_continuous(breaks = round(seq(0, 850, by = 100),1), 
                      expand = c(0, 0), 
-                     limits = c(0,800))
+                     limits = c(0, 850))
 
 pathname <- "./images"
 printfile <- "geocachesJaartotalen.png"
@@ -270,12 +270,12 @@ jaarTotalenPerLand$totaal <- as.integer(jaarTotalenPerLand$totaal)
 glimpse(jaarTotalenPerLand)
 
 # plot de resultaten: histogram met aantal gevonden caches per maand:
-ggplot(jaarTotalenPerLand, aes(x=jaar,y=totaal, fill=land)) +
+ggplot(jaarTotalenPerLand, aes(x = jaar,y = totaal, fill = land)) +
 # + stat_summary(fun.y=sum,geom="bar")
-  geom_bar(stat="identity") +
+  geom_bar(stat = "identity") +
   theme_bw() +
-  labs(title="Aantal gevonden caches per jaar", x="jaar", y="aantal") +
-  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0))
+  labs(title = "Aantal gevonden caches per jaar", x = "jaar", y = "aantal") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0))
 
 printfile <- "geocachesTotalenPerJaarEnLand.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
@@ -287,11 +287,11 @@ ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width =
 # example: http://ggplot2.org/book/qplot.pdf
 #####################################################################################
 # plot de resultaten: histogram met aantal gevonden caches per maand:
-ggplot(jaarTotalenPerLand, aes(x=land, y=totaal, fill=jaar)) +
-  geom_bar(stat="identity") +
+ggplot(jaarTotalenPerLand, aes(x = land, y = totaal, fill = jaar)) +
+  geom_bar(stat = "identity") +
   theme_bw() +
-  labs(title="Aantal gevonden caches per land", x="land", y="aantal") +
-  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0))
+  labs(title = "Aantal gevonden caches per land", x = "land", y = "aantal") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0))
 
 printfile <- "geocachesTotalenPerLandEnJaar.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
@@ -362,11 +362,15 @@ ggplot(data = df.hm, aes(x = mnd, y = jaar)) +
   geom_tile(aes(fill = total)) +
   scale_fill_gradient(low = "light green", high = "dark green") +
   scale_x_continuous(breaks = seq(1, 12, by = 1), labels = seq(1, 12, by = 1)) +
-  scale_y_continuous(breaks = seq(2007, 2016, by = 1), labels = seq(2007, 2016, by = 1)) +
+  scale_y_continuous(breaks = seq(2007, 2017, by = 1), labels = seq(2007, 2017, by = 1)) +
   theme_bw() + 
   labs(title="Aantal gevonden caches per jaar en maand", x="maand", y="jaar")
 
-##############################################################################################
+printfile <- "geocachesJaarEnMaand.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
+
+
+#############################################################################################
 # toon de aantallen per dag in een calender heatmap
 ##############################################################################################
 source("../tools/calendarHeat.R")
