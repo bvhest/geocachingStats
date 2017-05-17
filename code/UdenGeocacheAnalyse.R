@@ -270,16 +270,21 @@ jaarTotalenPerLand$totaal <- as.integer(jaarTotalenPerLand$totaal)
 glimpse(jaarTotalenPerLand)
 
 # plot de resultaten: histogram met aantal gevonden caches per maand:
-ggplot(jaarTotalenPerLand, aes(x = jaar,y = totaal, fill = land)) +
+p <- ggplot(jaarTotalenPerLand, aes(x = jaar,y = totaal, fill = land)) +
 # + stat_summary(fun.y=sum,geom="bar")
   geom_bar(stat = "identity") +
   theme_bw() +
   labs(title = "Aantal gevonden caches per jaar", x = "jaar", y = "aantal") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0))
 
+print(p)
 printfile <- "geocachesTotalenPerJaarEnLand.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
+p <- p + coord_polar()
+print(p)
+printfile <- "geocachesTotalenPerJaarEnLand.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
 # bereken totalen per land
@@ -287,13 +292,19 @@ ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width =
 # example: http://ggplot2.org/book/qplot.pdf
 #####################################################################################
 # plot de resultaten: histogram met aantal gevonden caches per maand:
-ggplot(jaarTotalenPerLand, aes(x = land, y = totaal, fill = jaar)) +
+p <- ggplot(jaarTotalenPerLand, aes(x = land, y = totaal, fill = jaar)) +
   geom_bar(stat = "identity") +
   theme_bw() +
   labs(title = "Aantal gevonden caches per land", x = "land", y = "aantal") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0))
 
+print(p)
 printfile <- "geocachesTotalenPerLandEnJaar.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
+
+p <- p + coord_polar()
+print(p)
+printfile <- "geocachesTotalenPerLandEnJaar_polar.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
@@ -309,13 +320,19 @@ maandTotalen <- unique(merge(maandTotalen, df[,c("mnd","maand")], by="mnd"))
 maandTotalen$maand <- factor(maandTotalen$maand, levels=unique(maandTotalen$maand))
 
 # plot de resultaten: histogram met aantal gevonden caches per maand:
-ggplot(maandTotalen, aes(x=maand,y=maand_som)) + 
+p <- ggplot(maandTotalen, aes(x=maand,y=maand_som)) + 
   stat_summary(fun.y=sum,geom="bar", fill="#00A6FF") +
 #  scale_y_discrete(breaks=seq(0, 110, by=10), labels=seq(0, 110, by=10)) +
   theme_bw() +
   labs(title="Aantal gevonden caches per maand", x="maand", y="aantal") 
 
+print(p)
 printfile <- "geocachesMaandtotalen.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
+
+p <- p + coord_polar()
+print(p)
+printfile <- "geocachesMaandtotalen_polar.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
@@ -332,13 +349,19 @@ dagTotalen <- dagTotalen[order(dagTotalen$dagNum),]
 dagTotalen$dvw <- factor(dagTotalen$dvw, levels=unique(dagTotalen$dvw))
 
 # plot de resultaten: histogram met aantal gevonden caches per maand:
-ggplot(dagTotalen, aes(x=dvw,y=dvw_som)) + 
+p <- ggplot(dagTotalen, aes(x=dvw,y=dvw_som)) + 
   stat_summary(fun.y=sum,geom="bar", fill="#00A6FF") +
 #  scale_y_discrete(breaks=seq(0, 200, by=20), labels=seq(0, 200, by=20)) +
   theme_bw() +
   labs(title="Aantal gevonden caches per weekdag", x="weekdag", y="aantal")
 
+print(p)
 printfile <- "geocachesWeekdagtotalen.png"
+ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
+
+p <- p + coord_polar()
+print(p)
+printfile <- "geocachesWeekdagtotalen_polar.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 
