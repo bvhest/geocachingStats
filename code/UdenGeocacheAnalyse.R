@@ -171,7 +171,7 @@ ggplot(df, aes(x = datum), show.legend = FALSE) +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
   scale_y_continuous(breaks = round(seq(0, 850, by = 100),1), 
                      expand = c(0, 0), 
-                     limits = c(0, 850))
+                     limits = c(0, 900))
 
 pathname <- "./images"
 printfile <- "geocachesJaartotalen.png"
@@ -208,7 +208,7 @@ p1 <- ggplot(df, aes(x = datum), show.legend = FALSE) +
   geom_ribbon(aes(ymin=0, ymax=tot_som), fill="#92C94D", color="#35520F") +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels = date_format("%Y")) +
   scale_y_continuous(expand = c(0, 0), 
-                     limits = c(0, 860)) +
+                     limits = c(0, 900)) +
   theme_bw() +
   labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x = "jaar", y = "totaal aantal")
   
@@ -281,9 +281,9 @@ print(p)
 printfile <- "geocachesTotalenPerJaarEnLand.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
-p <- p + coord_polar()
+p <- p + coord_polar(start = pi/2)
 print(p)
-printfile <- "geocachesTotalenPerJaarEnLand.png"
+printfile <- "geocachesTotalenPerJaarEnLand_polar.png"
 ggsave(filename = printfile, device = "png", path = pathname, scale = 4, width = 68, height = 43, units = "mm")
 
 #####################################################################################
