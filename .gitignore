@@ -1,9 +1,13 @@
+data/UdenGeocaching_20170813_bestanden
+images
+voorbeeld
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-/.project
-voorbeeld
-images
+.project
 *.png
 *.gif
+*.html
+*.gpx
+mapmateDemo1.R
