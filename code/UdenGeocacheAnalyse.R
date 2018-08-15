@@ -26,6 +26,8 @@ library(googleVis)
 Sys.getlocale("LC_TIME")
 Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
 
+dit_jaar <- 2018
+
 #####################################################################################
 # load the data:
 #####################################################################################
@@ -169,9 +171,9 @@ ggplot(df, aes(x = datum), show.legend = FALSE) +
   theme_bw() +
   labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
-  scale_y_continuous(breaks = round(seq(0, 850, by = 100),1), 
+  scale_y_continuous(breaks = round(seq(0, 925, by = 100),1), 
                      expand = c(0, 0), 
-                     limits = c(0, 900))
+                     limits = c(0, 925))
 
 pathname <- "./images"
 printfile <- "geocachesJaartotalen.png"
@@ -385,7 +387,7 @@ ggplot(data = df.hm, aes(x = mnd, y = jaar)) +
   geom_tile(aes(fill = total)) +
   scale_fill_gradient(low = "light green", high = "dark green") +
   scale_x_continuous(breaks = seq(1, 12, by = 1), labels = seq(1, 12, by = 1)) +
-  scale_y_continuous(breaks = seq(2007, 2017, by = 1), labels = seq(2007, 2017, by = 1)) +
+  scale_y_continuous(breaks = seq(2007, dit_jaar, by = 1), labels = seq(2007, dit_jaar, by = 1)) +
   theme_bw() + 
   labs(title="Aantal gevonden caches per jaar en maand", x="maand", y="jaar")
 
