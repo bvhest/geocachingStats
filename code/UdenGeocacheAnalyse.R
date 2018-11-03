@@ -171,9 +171,9 @@ ggplot(df, aes(x = datum), show.legend = FALSE) +
   theme_bw() +
   labs(title="Cumulatief aantal gevonden caches per jaar en totaal", x="jaar", y="aantal") +
   scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", labels=date_format("%Y")) +
-  scale_y_continuous(breaks = round(seq(0, 925, by = 100),1), 
+  scale_y_continuous(breaks = round(seq(0, 1000, by = 100),1), 
                      expand = c(0, 0), 
-                     limits = c(0, 925))
+                     limits = c(0, 1000))
 
 pathname <- "./images"
 printfile <- "geocachesJaartotalen.png"
@@ -415,7 +415,7 @@ dagTotalen <- transform(dagTotalen,
 
 # max. 3 jaren per 'pagina', dus de data opsplitsen:
 jaar <- min(year = as.POSIXlt(dagTotalen$datum)$year + 1900)
-for (i in 0:3) {
+for (i in 0:4) {
   jaarMin <- jaar + (i*3)
   jaarMax <- jaarMin + 3
   view <- dagTotalen[dagTotalen$jaar >= jaarMin & dagTotalen$jaar < jaarMax,]
